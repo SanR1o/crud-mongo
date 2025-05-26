@@ -32,7 +32,7 @@ exports.createProduct = async (req,res) => {
         if (!subcategoryExist){
             return res.status(400).json({
                 success: false,
-                message: 'la subcategoria solicitada no existe o no pertenece a la categoria eespecifica'
+                message: 'la subcategoria solicitada no existe o no pertenece a la categoria especifica'
             });
         }
 
@@ -112,7 +112,7 @@ exports.getProductById = async (req,res) => {
         const product = await Product.findById(req.params.id).populate('category', 'name', 'description').populate('subcategory', 'name', 'description');
 
         if (!product){
-            res.status(404).json({
+            return res.status(404).json({
                 success: false,
                 message:'Error al encontrar producto'
             });
@@ -139,7 +139,7 @@ exports.updateProduct = async (req,res) => {
         const {name, description, price, stock, category, subcategory} = req.body;
         const updateData = {};
 
-        //validar y preparar  datos para actualizar
+        // Preparar datos para actualizar
         if(name) updateData.name = name;
         if(description) updateData.description = description;
         if(price) updateData.price = price;
@@ -147,42 +147,39 @@ exports.updateProduct = async (req,res) => {
         if(category) updateData.category = category;
         if(subcategory) updateData.subcategory = subcategory;
 
-        //validar relaciones si se actualizan
-        if(!category || subcategory){
-            if (category){
+        // Validar relaciones solo si vienen en la actualización
+        if(category || subcategory){
+            if(category){
                 const categoryExist = await Category.findById(category);
-                if (!categoryExist){
-                    res.status(404).json({
+                if(!categoryExist){
+                    return res.status(404).json({
                         success: false,
                         message: 'La categoria solicitada no existe'
                     });
                 }
-                updateData.category = category;
             }
-
-            if (subcategory){
+            if(subcategory){
                 const subcategoryExist = await Subcategory.findOne({
                     _id: subcategory,
                     category: category || updateData.category
                 });
-                if (!subcategoryExist){
-                    res.status(404).json({
+                if(!subcategoryExist){
+                    return res.status(404).json({
                         success: false,
-                        message: 'La subcatego solicitada no existe'
+                        message: 'La subcategoria solicitada no existe o no pertenece a la categoria'
                     });
                 }
-                updateData.subcategory = Subcategory;
             }
         }
 
-        //actualizar producto
+        // Actualizar producto
         const updateProduct = await Product.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators : true
         }).populate('category', 'name').populate('subcategory', 'name');
 
-        if (!updateProduct){
-            res.status(404).json({
+        if(!updateProduct){
+            return res.status(404).json({
                 success: false,
                 message:'Error al encontrar producto'
             });
@@ -204,8 +201,22 @@ exports.updateProduct = async (req,res) => {
     }
 };
 
+
 exports.deleteProduct = async (req,res) => {
     try {
+        const deleteProduct = await Product.findByIdAndDelete(req.params.id);
+        if (!deleteProduct) {
+            return res.status(404).json({
+                success: false,
+                message: 'producto no encontrado'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Producto eliminado exitosamente',
+            data: deleteProduct
+        });
 
     } catch (error) {
         console.error('Error en deleteProduct: ', error);
