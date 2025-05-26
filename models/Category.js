@@ -45,4 +45,4 @@ categorySchema.index({ name: 1 }, {
     name: 'name_1' // Nombre explícito para el índice
 });
 
-module.exports = mongoose.model('Category', categorySchema);
+module.exports = mongoose.model('category', categorySchema);
