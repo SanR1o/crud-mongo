@@ -36,9 +36,9 @@ exports.signup = async (req, res) => {
             message: 'Usuario registrado correctamente', 
             token: token,
             user: savedUser
-        })
+        });
     } catch(error) {
-            res.status(500).json({
+            return res.status(500).json({
             success: false,
             message: 'Error al registrar usuario',
             error: error.message
@@ -132,7 +132,7 @@ exports.signin = async (req, res) => {
         });
     } catch(error) {
             console.error('[AuthController] Error critico:', error);
-            res.status(500).json({
+            return res.status(500).json({
             success: false,
             message: 'Error en el servidor',
             error: error.message
@@ -159,7 +159,7 @@ exports.getAllUsers = async (req, res) => {
 
     } catch(error) {
             console.error('Error en getAllUsers', error);
-            res.status(500).json({
+            return res.status(500).json({
             success: false,
             message: 'Error al consultar usuarios'
         });
@@ -331,3 +331,36 @@ exports.updateUser = async (req, res) => {
     }
 };
 
+// Eliminar usuario (solo admin)
+exports.deleteUser = async (req, res) => {
+    try {
+        //verificar si es admin
+        if(!checkPermission(req.userTole, [ROLES.ADMIN])){
+            return res.status(403).json({
+                success: false,
+                message: 'Solo administradores pueden eliminar'
+            });
+        }
+
+        const deletedUser = await User.findByIdAndDelete(req.params.id);
+
+        if (!deletedUser){
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Usuario eliminado exitosamente'
+        });
+
+    } catch (error) {
+        console.error('Error en deleteUser: ', error);
+        return res.status(500).json({
+        success: false,
+        message: 'Error al eliminar usuario'
+        });
+    }
+};
