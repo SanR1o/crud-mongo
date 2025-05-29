@@ -150,7 +150,12 @@ exports.getAllUsers = async (req, res) => {
             });
         }
 
-        const users = await User.find({}).select('-password');
+        const users = await User.find({}).select('-password-__v');
+        return res.status(200).json({
+            success: true,
+            count: users.length,
+            data: users
+        });
 
     } catch(error) {
             console.error('Error en getAllUsers', error);
@@ -214,9 +219,9 @@ console.log('\n=== INICIO DE CONSULTA POR ID');
             { userId: new ObjectId(id) }
         ).toArray();
 
-        const rolesIds = userRoles.map(ur => ur.roleId);
+        const roleIds = userRoles.map(ur => ur.roleId);
         const roles = await db.collection('roles').find(
-        { _id: {$in: rolesIds} }
+        { _id: {$in: roleIds} }
         ).toArray();
 
         console.log('[6] Roles encontrados', roles.map(r => r.name));
@@ -325,3 +330,4 @@ exports.updateUser = async (req, res) => {
         });
     }
 };
+
