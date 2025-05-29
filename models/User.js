@@ -45,17 +45,4 @@ userSchema.pre('save', async function(next) {
     }
 });
 
-// Método para comparar contraseñas
-userSchema.methods.comparePassword = async function(candidatePassword) {
-    return bcrypt.compare(candidatePassword, this.password);
-};
-
-// Eliminar password de la respuesta JSON
-userSchema.set('toJSON', {
-    transform: (doc, ret) => {
-        delete ret.password;
-        return ret;
-    }
-});
-
 module.exports = mongoose.model('User', userSchema);
