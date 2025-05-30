@@ -8,7 +8,7 @@ const checkRole = (...allowedRoles) => {
         }
 
         if(!allowedRoles.includes(req.userRole)){
-            console.log('Acceso denegado para ${req.userEmail} (${req.userRole}) en ruta ${req.path}');
+            console.log(`Acceso denegado para ${req.userEmail} (${req.userRole}) en ruta ${req.path}`);
             return res.status(403).json({
                 success: false,
                 message:'no tienes permisos para esta accion'

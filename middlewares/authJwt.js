@@ -15,7 +15,7 @@ const verifyTokenFn = (req, res, next) => {
         if(!token){
             console.log('[AuthJWT] Error: Token no proporcionado');
             return res.status(403).json({
-                succes: false,
+                success: false,
                 message: 'Token no proporcionado'
             });
         }
@@ -28,7 +28,7 @@ const verifyTokenFn = (req, res, next) => {
     } catch (error) {
         console.log('[AuthJWT] Error: ', error.name, '_', error.message);
         return res.status(401).json({
-            succes: false,
+            success: false,
             message: 'Token invalido',
             error: error.name
         });
@@ -52,4 +52,15 @@ const AuthJWT = (req, res, next) => {
             message: 'Token invalido'
         });
     }
+};
+
+if(typeof verifyTokenFn !== 'function'){
+    console.error('[AuthJWT] ERROR: VerifyTokenFn no es funcional');
+    throw new Error('VerifiTokenFn debe ser una función');
+};
+
+console.log('[AuthJWT] ERROR: middleware verifyTokenFn es una funcion: ', typeof verifyTokenFn);
+
+module.exports = {
+    verifyToken: verifyTokenFn
 };
