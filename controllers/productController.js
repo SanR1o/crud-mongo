@@ -2,7 +2,6 @@ const Product = require('../models/Product')
 const Category = require('../models/Category')
 const Subcategory = require('../models/Subcategory')
 
-
 exports.createProduct = async (req,res) => {
     try{
         const {name, description, price, stock, category, subcategory} = req.body;
@@ -109,7 +108,7 @@ exports.getProducts = async (req,res) => {
 
 exports.getProductById = async (req,res) => {
     try {
-        const product = await Product.findById(req.params.id).populate('category', 'name', 'description').populate('subcategory', 'name', 'description');
+        const product = await Product.findById(req.params.id).populate('category', 'name description').populate('subcategory', 'name description');
 
         if (!product){
             return res.status(404).json({
@@ -132,7 +131,6 @@ exports.getProductById = async (req,res) => {
         });
     }
 };
-
 
 exports.updateProduct = async (req,res) => {
     try {
@@ -200,7 +198,6 @@ exports.updateProduct = async (req,res) => {
         });
     }
 };
-
 
 exports.deleteProduct = async (req,res) => {
     try {

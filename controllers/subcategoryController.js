@@ -50,7 +50,7 @@ exports.createSubcategory = async (req, res) =>{
 //obtener todas las subcategorias
 exports.getSubcategories = async (req, res) => {
     try{
-        const subcategories = await Subcategory.findById().populate('category', 'name');
+        const subcategories = await Subcategory.find().populate('category', 'name');
         res.status(200).json({
             success: true,
             data: subcategories
@@ -108,9 +108,9 @@ exports.updateSubcategory = async (req, res) => {
 
         const updateSubcategory = await Subcategory.findByIdAndUpdate(req.params.id,
                 {
-                    name: name? name.trim() : undefined,
-                    description: description? description.trim() : undefined,
-                    category
+                    name: name ? name.trim() : undefined,
+                    description: description ? description.trim() : undefined,
+                    category    
                 },
                 {new: true, runValidators: true}
             );
@@ -127,6 +127,7 @@ exports.updateSubcategory = async (req, res) => {
             message: 'Subcategoria actualizada',
             data: updateSubcategory
         });
+
     } catch (error) {
         console.error('Error al actualizar la subcategoria', error);
         res.status(500).json({

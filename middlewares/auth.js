@@ -3,7 +3,7 @@ const User = require('../models/User');
 
 exports.authenticate = async (req, res, next) => {
     try{
-        const token = req.header('Autorizacion')?.replace('Bearer ','');
+        const token = req.header('Authorization')?.replace('Bearer ', '');
 
         if(!token){
             return res.status(401).json({
@@ -37,7 +37,7 @@ exports.authenticate = async (req, res, next) => {
 exports.authorize = (roles) => {
     return  (req, res , next) =>{
         if(!roles.includes(req.user.role)){
-            return res.status(401).json({
+            return res.status(403).json({
                 success: false,
                 message: 'no tienes autorizacion para esta accion',
                 requiredRole: roles,

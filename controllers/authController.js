@@ -26,9 +26,7 @@ exports.signup = async (req, res) => {
         });
 
         const savedUser = await user.save();
-
         const token = jwt.sign({ id: savedUser._id }, config.secret, {
-
         });
 
         res.status(200).json({
@@ -100,12 +98,12 @@ exports.signin = async (req, res) => {
             });
         }
 
-        const passworIsValid = bcrypt.compareSync(
+        const passwordIsValid = bcrypt.compareSync(
             req.body.password,
             user.password
         );
 
-        if(!passworIsValid) {
+        if(!passwordIsValid) {
             console.log('[AuthController] Contraseña incorrecta');
             return res.status(401).json({
                 success: false,
@@ -114,11 +112,9 @@ exports.signin = async (req, res) => {
         }
 
         //5. Generar token
-        const token = jwt.sign({ id: user._id }, config.secret,
-            {
+        const token = jwt.sign({ id: user._id }, config.secret,{
                 expiresIn: config.jwtExpiration
-            }
-        )
+            });
 
         //6. Responder (ocultando password)
         const userResponse = user.toObject();
@@ -200,7 +196,7 @@ console.log('\n=== INICIO DE CONSULTA POR ID');
 
         //3.1 Buscar usuario
         const user = await db.collection('users').findOne(
-            { _id: new isObjectIdOrHexString(id) },
+            { _id: new ObjectId(id) },
             { projection: {_id: 1, username: 1, email: 1, createAt: 1, updateAt: 1 }}
         );
 
@@ -234,7 +230,7 @@ console.log('\n=== INICIO DE CONSULTA POR ID');
                 username: user.username,
                 email: user.email,
                 roles: roles.map(r => r.name),
-                createAt: user.createAt,
+                createdAt: user.createdAt,
                 updatedAt : user.updatedAt
             }
         };
@@ -270,7 +266,7 @@ exports.updateUser = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
-        const currentUserRole = req.user.Role;
+        const currentUserRole = req.userRole;
         const currentUserId = req.userId;
 
         //Buscar usuario a actualizar 
@@ -315,13 +311,14 @@ exports.updateUser = async (req, res) => {
             filteredUpdates.password = bcrypt.hashSync(updates.password, 8);
         }
 
-        const updatedUser = await User.findByIdAndUpdate(id, filteredUpdates, {new: true}).select('-password -__v');
+        const updatedUser = await User.findByIdAndUpdate(id, filteredUpdates, {new: true}).select('-password-__v');
 
         return res.status(200).json({
         success: true,
         message: 'Usuario actualizado',
         data: updatedUser
         });
+
     } catch(error) {
         console.error('Error en updateUser', error);
         return res.status(500).json({

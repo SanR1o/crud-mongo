@@ -47,8 +47,6 @@ exports.createCategory = async (req, res) => {
 
     } catch (error) {
         console.error('Error en createCategory:', error);
-
-        // Manejo específico de errores de duplicados (MongoDB error code 11000)
         if (error.code === 11000) {
             return res.status(400).json({
                 success: false,
