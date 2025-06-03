@@ -85,7 +85,6 @@ exports.createUser = async  (req, res) => {
                 id: savedUser._id,
                 username: savedUser.username,
                 email: savedUser.email,
-                /*password: savedUser.password,*/
                 role: savedUser.role
             }
         });
@@ -103,12 +102,12 @@ exports.createUser = async  (req, res) => {
 //actualizar usuario
 exports.updateUser = async  (req, res) => {
     try{
-        const updateUser = await User.findByIdAndUpdate(req.params.id,
+        const updatedUser = await User.findByIdAndUpdate(req.params.id,
             {$set: req. body},
             {new: true }
         ).select('-password');
 
-        if(!updateUser){
+        if(!updatedUser){
             return res.status(404).json({
                 success: false,
                 message:'Usuario no encontrado'
@@ -117,8 +116,9 @@ exports.updateUser = async  (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: 'Usuario actualizado'
-        });
+            message: 'Usuario actualizado',
+            user: updatedUser
+        });        
 
     } catch (error) {
         console.error('Error en updateUser: ', error);
