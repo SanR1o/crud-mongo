@@ -5,4 +5,4 @@
   npm install express mongoose bcryptjs jsonwebtoken cors dotenv body-parser express-validator morgan
 
 #### Start
-  npm run -
+  npm run dev
