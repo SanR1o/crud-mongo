@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const { verifySignUp } = require('../middlewares/verifySignUp');
+const verifySignUp = require('../middlewares/verifySignUp');
 
 //importacion de verificacion
 let verifyToken;

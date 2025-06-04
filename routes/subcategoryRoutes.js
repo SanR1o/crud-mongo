@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const subcategoryController = require('../controllers/subcategoryController');
-const { check } = require('express-validatior');
+const { check } = require('express-validator');
 
 //Validaciones
 const validateSubcategory = [

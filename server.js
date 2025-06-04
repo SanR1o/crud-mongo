@@ -3,9 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const morgan = require('morgan');
-//const config = require('morgan');
+const config = require('./config');
 const { MongoClient, ObjectId } =  require('mongodb');
-
 //importar rutas
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -29,7 +28,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 //conexion a mongoDB
-mongoose.connect(process.env.MONGODB_URI).then(() => console.log('OK mongoDB conectado')).catch(err => console.error('X Error de conexion a mongoDB', err));
+mongoose.connect(process.env.MONGODB_URI).then(() => console.log('OK mongoDB conectado'))
+.catch(err => console.error('X Error de conexion a mongoDB', err));
 
 //rutas
 app.use('/api/auth', authRoutes);

@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/auth.config');
 const { User } = require('../models/User');
 
-console.log('[AuthJWT] Configuracion cargada: ', config.secret ? '***' + config.secret.slice(-5) : 'NO CONFIGURACION');
+console.log('[AuthJWT] Configuracion cargada: ', config.secret ? '***' + config.secret.slice(-5) : 'NO CONFIGURADO');
 
 //Definicion del middleware
 const verifyTokenFn = (req, res, next) => {
@@ -21,8 +21,8 @@ const verifyTokenFn = (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, config.secret);
-        req.user.id = decoded.id;
-        req.user.Role = decoded.role;
+        req.userId = decoded.id;
+        req.userRole = decoded.role;
         console.log('[AuthJWT] Token valido para: ', decoded.email);
         next();
     } catch (error) {
@@ -57,7 +57,7 @@ const AuthJWT = (req, res, next) => {
 if(typeof verifyTokenFn !== 'function'){
     console.error('[AuthJWT] ERROR: VerifyTokenFn no es funcional');
     throw new Error('VerifiTokenFn debe ser una función');
-};
+}
 
 console.log('[AuthJWT] ERROR: middleware verifyTokenFn es una funcion: ', typeof verifyTokenFn);
 

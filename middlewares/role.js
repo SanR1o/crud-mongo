@@ -1,9 +1,9 @@
 const checkRole = (...allowedRoles) => {
     return (req, res, next) => {
         if(!req.userRole) {
-            console.error('Intento de  verificar rol sin tpken valido')
+            console.error('Intento de verificar rol sin token valido')
             return res.status(500).json({
-                message:'No tienes permiso para esta accion'
+                message:'NO tienes permiso para esta accion'
             });
         }
 

@@ -24,6 +24,7 @@ const checkDuplicateUsernameOrEmail = async (req, res, next) => {
         }
 
         next();
+
     } catch (err) {
         console.error('[verifySignUp] Error en checkDuplicateUsernameOrEmail:', err);
         return res.status(500).json({

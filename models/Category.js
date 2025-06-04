@@ -30,6 +30,7 @@ categorySchema.pre('save', async function(next) {
         if (problematicIndex) {
             await collection.dropIndex('name_1');
         }
+
     } catch (err) {
         // Ignorar si el índice no existe
         if (!err.message.includes('Index not found')) {
