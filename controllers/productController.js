@@ -47,8 +47,8 @@ exports.createProduct = async (req,res) => {
         });
 
         //verificar si el usuario esta disponible en el request
-        if(req.user && req.user.id){
-            product.createdBy = req.user.id;
+        if(req.user && req.userId){
+            product.createdBy = req.userId;
         }
 
         //guardar en la base de datos

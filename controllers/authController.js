@@ -21,13 +21,17 @@ exports.signup = async (req, res) => {
             const user = new User ({
             username: req.body.username,
             email: req.body.email,
-            password: bcrypt.hashSync(req.body.password,8),
+            password: req.body.password,/*password: bcrypt.hashSync(req.body.password,8),*/
             role: req.body.role || 'auxiliar' // Usamos el valor directo
         });
 
         const savedUser = await user.save();
-        const token = jwt.sign({ id: savedUser._id }, config.secret, {
-        });
+
+        const token = jwt.sign(
+            { id: user._id, role: user.role, email: user.email },
+            config.secret,
+            { expiresIn: config.jwtExpiration }
+        );
 
         res.status(200).json({
             success: true, 
@@ -112,9 +116,11 @@ exports.signin = async (req, res) => {
         }
 
         //5. Generar token
-        const token = jwt.sign({ id: user._id }, config.secret,{
-                expiresIn: config.jwtExpiration
-            });
+        const token = jwt.sign(
+    { id: user._id, role: user.role, email: user.email },
+    config.secret,
+    { expiresIn: config.jwtExpiration }
+    );
 
         //6. Responder (ocultando password)
         const userResponse = user.toObject();

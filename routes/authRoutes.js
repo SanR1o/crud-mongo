@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { verifySignUp } = require('../middlewares');
+const User = require('../models/User');
 
 //importacion de verificacion
 let verifyToken;

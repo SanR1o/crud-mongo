@@ -35,14 +35,14 @@ exports.getUserById = async  (req, res) => {
         }
 
         //validaciones de acceso
-        if (req.user.role === 'auxiliar' && req.user.id!== user.id.toString()){
+        if (req.userRole === 'auxiliar' && req.userId!== user.id.toString()){
             return res.status(403).json({
                 success: false,
                 message:'No tienes permiso para ver este usuario'
             });
         }
 
-        if(req.user.role === 'coordinador' && user.role === 'admin' ){
+        if(req.userRole === 'coordinador' && user.role === 'admin' ){
             return res.status(403).json({
                 success: false,
                 message:'NO puedes ver usuarios admin'
@@ -72,7 +72,7 @@ exports.createUser = async  (req, res) => {
         const user = new User({
             username, 
             email, 
-            password: await bcrypt.hash(password, 10), 
+            password/*: await bcrypt.hash(password, 10)*/, 
             role
         });
 
