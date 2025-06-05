@@ -26,11 +26,13 @@ exports.signup = async (req, res) => {
         });
 
         const savedUser = await user.save();
+        console.log('[AuthController] Usuario registrado:', savedUser.email);
 
         const token = jwt.sign(
-            { id: user._id, role: user.role, email: user.email },
-            config.secret,
-            { expiresIn: config.jwtExpiration }
+            { 
+            id: savedUser._id, role: savedUser.role, email: savedUser.email 
+            },
+            config.secret, { expiresIn: config.jwtExpiration }
         );
 
         res.status(200).json({
@@ -52,6 +54,14 @@ exports.signup = async (req, res) => {
 exports.signin = async (req, res) => {
     try {
         console.log('[AuthController] Body recibido:', req.body);
+        console.log('[AuthController] Login iniciado:', req.body.email);
+
+        if (!req.body.email || !req.body.password){
+            return res.status(400).json({
+                success: false,
+                message: 'Email y contraseña son requeridas'
+            });
+        }
 
         //1. Validacion de campos requeridos 
         if((!req.body.username && !req.body.email) || !req.body.password) {
@@ -63,7 +73,7 @@ exports.signin = async (req, res) => {
 
             return res.status(400).json({
                 success: false,
-                message: 'Se requiere email/ username/ password'
+                message: 'Se requiere email o password'
             });
         }
 
@@ -117,10 +127,11 @@ exports.signin = async (req, res) => {
 
         //5. Generar token
         const token = jwt.sign(
-    { id: user._id, role: user.role, email: user.email },
-    config.secret,
-    { expiresIn: config.jwtExpiration }
-    );
+            { 
+                id: user._id, role: user.role, email: user.email 
+            },
+            config.secret, { expiresIn: config.jwtExpiration }
+        );
 
         //6. Responder (ocultando password)
         const userResponse = user.toObject();
@@ -128,10 +139,14 @@ exports.signin = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: 'Login exitoso',
             token: token,
-            user: userResponse
+            user: {
+                id: user.id,
+                email: user.id,
+                role: user.role
+            }
         });
+
     } catch(error) {
             console.error('[AuthController] Error critico:', error);
             return res.status(500).json({

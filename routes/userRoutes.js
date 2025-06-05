@@ -4,7 +4,6 @@ const userController = require('../controllers/userController');
 const { verifyToken } = require('../middlewares/authJwt');
 const { checkRole } = require('../middlewares/role');
 
-//
 router.use((req, res, next) => {
     console.log('\n=== DIAGNOSTICO FR RUTA ===');
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
