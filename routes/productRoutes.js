@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
-const { check } = require('express-validator')
+const { check } = require('express-validator');
+const { verifyToken } = require('../middlewares/authJwt');
+const { checkRole } = require('../middlewares/role');
 
 const validateProduct = [
     check('name').not().isEmpty().withMessage('El nombre es obligatorio'),
@@ -12,10 +14,31 @@ const validateProduct = [
     check('subcategory').not().isEmpty().withMessage('La subcategoria es obligatoria')
 ];
 
-router.post('/', validateProduct, productController.createProduct);
+//Crear producto
+router.post('/', 
+    verifyToken,
+    checkRole('admin'),
+    validateProduct, productController.createProduct
+);
+
+//Obtener todos los productos
 router.get('/', productController.getProducts);
+
+//Obtener producto por ID
 router.get('/:id', productController.getProductById);
-router.put('/:id', validateProduct, productController.updateProduct);
-router.delete('/:id',productController.deleteProduct);
+
+//ACtualizar producto (solo admin y coordinador)
+router.put('/:id', 
+    verifyToken,
+    checkRole('admin', 'coordinador'),
+    validateProduct, productController.updateProduct
+);
+
+//Eliminar producto
+router.delete('/:id',
+    verifyToken,
+    checkRole('admin'),
+    productController.deleteProduct
+);
 
 module.exports = router;

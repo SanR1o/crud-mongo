@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const subcategoryController = require('../controllers/subcategoryController');
 const { check } = require('express-validator');
+const { verifyToken } = require('../middlewares/authJwt');
+const { checkRole } = require('../middlewares/role');
 
 //Validaciones
 const validateSubcategory = [
@@ -10,10 +12,33 @@ const validateSubcategory = [
     check('category').not().isEmpty().withMessage('la categoria es obligatoria')
 ];
 
-router.post('/', validateSubcategory, subcategoryController.createSubcategory);
+//Crear subcategoria
+router.post('/', 
+    verifyToken,
+    checkRole('admin'),
+    validateSubcategory, 
+    subcategoryController.createSubcategory
+);
+
+//Obtener todas las subcategorias
 router.get('/', subcategoryController.getSubcategories);
+
+//Obtener subcategoria por ID
 router.get('/:id', subcategoryController.getSubcategoryById);
-router.put('/:id', validateSubcategory, subcategoryController.updateSubcategory);
-router.delete('/:id', subcategoryController.deleteSubcategory);
+
+//Actualizar subcategoria (solo admin y coordinador)
+router.put('/:id', 
+    verifyToken,
+    checkRole('admin', 'coordinador'),
+    validateSubcategory, 
+    subcategoryController.updateSubcategory
+);
+
+//Eliminar subcategoria (solo admin) 
+router.delete('/:id', 
+    verifyToken,
+    checkRole('admin'),
+    subcategoryController.deleteSubcategory
+);
 
 module.exports = router;
