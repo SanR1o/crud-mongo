@@ -7,7 +7,7 @@ const { checkRole } = require('../middlewares/role');
 //Crear categoria
 router.post('/',
     verifyToken,
-    checkRole('admin'),
+    checkRole('admin', 'coordinador'),
     categoryController.createCategory
 );
 

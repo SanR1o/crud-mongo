@@ -15,7 +15,7 @@ const validateSubcategory = [
 //Crear subcategoria
 router.post('/', 
     verifyToken,
-    checkRole('admin'),
+    checkRole('admin', 'coordinador'),
     validateSubcategory, 
     subcategoryController.createSubcategory
 );

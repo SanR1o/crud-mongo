@@ -17,7 +17,7 @@ const validateProduct = [
 //Crear producto
 router.post('/', 
     verifyToken,
-    checkRole('admin'),
+    checkRole('admin', 'coordinador'),
     validateProduct, productController.createProduct
 );
 

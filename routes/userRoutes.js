@@ -18,7 +18,7 @@ router.use((req, res, next) => {
 //POST /api/users - crear usuario (solo admin)
 router.post('/', 
     verifyToken,
-    checkRole('admin'), 
+    checkRole('admin', 'coordinador'), 
     userController.createUser
 );
 
