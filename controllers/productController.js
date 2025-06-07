@@ -1,6 +1,6 @@
-const Product = require('../models/Product')
-const Category = require('../models/Category')
-const Subcategory = require('../models/Subcategory')
+const Product = require('../models/Product');
+const Category = require('../models/Category');
+const Subcategory = require('../models/Subcategory');
 
 exports.createProduct = async (req,res) => {
     try{
@@ -43,11 +43,11 @@ exports.createProduct = async (req,res) => {
             stock, 
             category, 
             subcategory
-            //createdBy se agrega despues de verificar el usuario
+            //createdBy comentado para mas adelante
         });
 
         //verificar si el usuario esta disponible en el request
-        if(req.user && req.userId){
+        if (req.userId) { //if(req.user && req.userId){
             product.createdBy = req.userId;
         }
 
@@ -57,7 +57,8 @@ exports.createProduct = async (req,res) => {
         //obtener el producto con los datos pedidos con los poblados
         const productWithDetails = await Product.findById(savedProduct._id)
         .populate('category', 'name')
-        .populate('subcategory','name');
+        .populate('subcategory','name')
+        .populate('createdBy', 'username email');
 
         return res.status(201).json({
             success: true,
@@ -88,6 +89,7 @@ exports.getProducts = async (req,res) => {
         const products = await Product.find()
         .populate('category', 'name')
         .populate('subcategory','name')
+        .populate('createdBy', 'username')
         .sort({createdAt: -1});
 
         res.status(200).json({
@@ -108,7 +110,10 @@ exports.getProducts = async (req,res) => {
 
 exports.getProductById = async (req,res) => {
     try {
-        const product = await Product.findById(req.params.id).populate('category', 'name description').populate('subcategory', 'name description');
+        const product = await Product.findById(req.params.id)
+        .populate('category', 'name description')
+        .populate('subcategory', 'name description')
+        .populate('createdBy', 'username');
 
         if (!product){
             return res.status(404).json({
@@ -174,7 +179,9 @@ exports.updateProduct = async (req,res) => {
         const updateProduct = await Product.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators : true
-        }).populate('category', 'name').populate('subcategory', 'name');
+        }).populate('category', 'name')
+        .populate('subcategory', 'name')
+        .populate('createdBy', 'username email');
 
         if(!updateProduct){
             return res.status(404).json({
