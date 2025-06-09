@@ -43,7 +43,6 @@ exports.createProduct = async (req,res) => {
             stock, 
             category, 
             subcategory
-            //createdBy comentado para mas adelante
         });
 
         //verificar si el usuario esta disponible en el request

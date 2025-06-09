@@ -1,11 +1,17 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
-//obtener todos los usuarios solo admin
 exports.getAllUsers = async  (req, res) => {
     console.log('[CONTROLLER] Ejecutando getAllUsers');
-    try{
-        const users = await User.find().select('-password');
+    try {
+        let users;
+        if (req.userRole === 'auxiliar') {
+            // Solo puede verse a sí mismo
+            users = await User.find({ _id: req.userId }).select('-password');
+        } else {
+            // Admin y coordinador ven todos
+            users = await User.find().select('-password');
+        }
         console.log('[CONTROLLER] Ejecutando getAllUsers: usuarios encontrados', users.length);
         res.status(200).json({
             success: true,

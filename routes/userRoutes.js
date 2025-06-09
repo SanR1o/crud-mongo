@@ -25,7 +25,7 @@ router.post('/',
 //GET /api/users - listar usuarios (admin y coordinador pueden ver todos, auxiliar solo se ve a si mismo)
 router.get('/', 
     verifyToken,
-    checkRole('admin', 'coordinador'),
+    checkRole('admin', 'coordinador', 'auxiliar'),
     userController.getAllUsers
 );
 
