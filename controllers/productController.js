@@ -83,13 +83,21 @@ exports.createProduct = async (req,res) => {
 };
 
 //consulta de productos
-exports.getProducts = async (req,res) => {
-    try{
+exports.getProducts = async (req, res) => {
+    try {
+        // Obtener los productos
         const products = await Product.find()
-        .populate('category', 'name')
-        .populate('subcategory','name')
-        .populate('createdBy', 'username')
-        .sort({createdAt: -1});
+            .populate('category', 'name')
+            .populate('subcategory', 'name')
+            .sort({ createdAt: -1 });
+
+        // Filtrar el campo createdBy si el rol del usuario es "auxiliar"
+        if (req.userRole === 'auxiliar') {
+            // Eliminar el campo 'createdBy' de cada producto
+            products.forEach(product => {
+                product.createdBy = undefined;
+            });
+        }
 
         res.status(200).json({
             success: true,
@@ -97,28 +105,32 @@ exports.getProducts = async (req,res) => {
             data: products
         });
 
-    } catch (error){
+    } catch (error) {
         console.error('Error en getProducts: ', error);
         res.status(500).json({
             success: false,
-            message:'Error al obtener productos',
+            message: 'Error al obtener productos',
             error: error.message
         });
     }
 };
 
-exports.getProductById = async (req,res) => {
+exports.getProductById = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id)
-        .populate('category', 'name description')
-        .populate('subcategory', 'name description')
-        .populate('createdBy', 'username');
+            .populate('category', 'name description')
+            .populate('subcategory', 'name description');
 
-        if (!product){
+        if (!product) {
             return res.status(404).json({
                 success: false,
-                message:'Error al encontrar producto'
+                message: 'Producto no encontrado'
             });
+        }
+
+        // Filtrar el campo createdBy si el rol del usuario es "auxiliar"
+        if (req.userRole === 'auxiliar') {
+            product.createdBy = undefined;
         }
 
         res.status(200).json({
@@ -130,7 +142,7 @@ exports.getProductById = async (req,res) => {
         console.error('Error en getProductById: ', error);
         res.status(500).json({
             success: false,
-            message:'Error al obtener producto',
+            message: 'Error al obtener producto',
             error: error.message
         });
     }

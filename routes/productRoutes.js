@@ -22,10 +22,16 @@ router.post('/',
 );
 
 //Obtener todos los productos
-router.get('/', productController.getProducts);
+router.get('/', 
+    verifyToken,
+    productController.getProducts
+);
 
 //Obtener producto por ID
-router.get('/:id', productController.getProductById);
+router.get('/:id', 
+    verifyToken,
+    productController.getProductById
+);
 
 //ACtualizar producto (solo admin y coordinador)
 router.put('/:id', 

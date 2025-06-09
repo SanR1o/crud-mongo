@@ -39,7 +39,7 @@ router.get('/:id',
 //PUT /api/users/:id - Actualizar usuario (admin y coordinador pueden actualizar)
 router.put('/:id', 
     verifyToken,
-    checkRole('admin', 'coordinador'), 
+    checkRole('admin', 'coordinador','auxiliar'), 
     userController.updateUser
 );
 

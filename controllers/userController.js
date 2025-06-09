@@ -105,18 +105,36 @@ exports.createUser = async  (req, res) => {
     }
 };
 
-//actualizar usuario
-exports.updateUser = async  (req, res) => {
-    try{
-        const updatedUser = await User.findByIdAndUpdate(req.params.id,
-            {$set: req. body},
-            {new: true }
+exports.updateUser = async (req, res) => {
+    try {
+        // Verificar si el usuario es un "auxiliar" y está intentando actualizar su propio perfil
+        if (req.userRole === 'auxiliar' && req.userId.toString() !== req.params.id) {
+            return res.status(403).json({
+                success: false,
+                message: 'No tienes permiso para actualizar este usuario'
+            });
+        }
+
+        // Si el auxiliar intenta modificar campos no permitidos, puedes agregar validaciones adicionales aquí
+        // Por ejemplo, un auxiliar no debe cambiar su propio rol:
+        if (req.userRole === 'auxiliar' && req.body.role) {
+            return res.status(403).json({
+                success: false,
+                message: 'No tienes permiso para modificar tu rol'
+            });
+        }
+
+        // Si no es auxiliar o es un admin/coordinador, se puede proceder con la actualización
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,  // Usamos el ID de la URL
+            { $set: req.body },  // Los datos a actualizar se pasan a través del body
+            { new: true }  // Esto asegura que se devuelva el documento actualizado
         ).select('-password');
 
-        if(!updatedUser){
+        if (!updatedUser) {
             return res.status(404).json({
                 success: false,
-                message:'Usuario no encontrado'
+                message: 'Usuario no encontrado'
             });
         }
 
@@ -124,13 +142,13 @@ exports.updateUser = async  (req, res) => {
             success: true,
             message: 'Usuario actualizado',
             user: updatedUser
-        });        
+        });
 
     } catch (error) {
         console.error('Error en updateUser: ', error);
         res.status(500).json({
             success: false,
-            message:'Error al actualizar el usuario',
+            message: 'Error al actualizar el usuario',
             error: error.message
         });
     }

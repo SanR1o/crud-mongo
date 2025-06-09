@@ -1,18 +1,16 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config/auth.config');
-const { User } = require('../models/User');
+//const { User } = require('../models/User');
 
-console.log('[AuthJWT] Configuracion cargada: ', config.secret ? '***' + config.secret.slice(-5) : 'NO CONFIGURADO');
-
-//Definicion del middleware
+// Verificación del middleware
 const verifyTokenFn = (req, res, next) => {
     console.log('\n[AuthJWT] Middleware ejecutandose para: ', req.originalUrl);
 
-    try{
+    try {
         const token = req.headers['x-access-token'] || req.headers.authorization?.split(' ')[1];
-        console.log('[AuthJWT] Token recibido: ', token ? '***' + token.slice(-8) : 'NO PROVISTO');
-
-        if(!token){
+        
+        // Verifica que haya un token en el encabezado
+        if (!token) {
             console.log('[AuthJWT] Error: Token no proporcionado');
             return res.status(403).json({
                 success: false,
@@ -20,12 +18,16 @@ const verifyTokenFn = (req, res, next) => {
             });
         }
 
+        // Verifica el token usando el secreto de la configuración
         const decoded = jwt.verify(token, config.secret);
         req.userId = decoded.id;
         req.userRole = decoded.role;
+        
+        // Log de depuración (con menos detalles sensibles)
         console.log('[AuthJWT] Token valido para: ', decoded.email);
         next();
     } catch (error) {
+        // Error si el token no es válido
         console.log('[AuthJWT] Error: ', error.name, '_', error.message);
         return res.status(401).json({
             success: false,
@@ -35,31 +37,11 @@ const verifyTokenFn = (req, res, next) => {
     }
 };
 
-const AuthJWT = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1];
-    if(!token){
-        return res.status(401).json({
-            message: 'Token no proporcionado'
-        });
-    }
-
-    try{
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-        next();
-    } catch (error) {
-        return res.status(401).json({
-            message: 'Token invalido'
-        });
-    }
-};
-
-if(typeof verifyTokenFn !== 'function'){
-    console.error('[AuthJWT] ERROR: VerifyTokenFn no es funcional');
-    throw new Error('VerifiTokenFn debe ser una función');
+// Verifica que `verifyTokenFn` sea una función válida
+if (typeof verifyTokenFn !== 'function') {
+    console.error('[AuthJWT] ERROR: verifyTokenFn no es una función');
+    throw new Error('verifyTokenFn debe ser una función');
 }
-
-console.log('[AuthJWT] ERROR: middleware verifyTokenFn es una funcion: ', typeof verifyTokenFn);
 
 module.exports = {
     verifyToken: verifyTokenFn
