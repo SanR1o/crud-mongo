@@ -52,24 +52,22 @@ class UserService {
   }
 
   async getRoles() {
-    // Roles fijos basados en tu backend
     return ['admin', 'coordinador', 'auxiliar'];
   }
 
-  // Verifica si el usuario actual puede editar otro usuario
   canEdit(currentUser, targetUser) {
     if (!currentUser || !targetUser) return false;
     if (currentUser.roles.includes('admin')) return true;
     if (currentUser.roles.includes('coordinador')) return true;
-    if (currentUser._id === targetUser._id) return true; // Puede editarse a sí mismo
+    if (currentUser._id === targetUser._id) return true;
     return false;
   }
 
-  // Verifica si el usuario actual puede eliminar otro usuario
   canDelete(currentUser) {
     if (!currentUser) return false;
     return currentUser.roles.includes('admin');
   }
 }
 
-export default new UserService();
+const userService = new UserService();
+export default userService;

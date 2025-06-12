@@ -1,6 +1,6 @@
 import { utils, writeFile } from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export const exportToExcel = (data, fileName = 'usuarios') => {
   const worksheet = utils.json_to_sheet(data);
@@ -11,20 +11,25 @@ export const exportToExcel = (data, fileName = 'usuarios') => {
 
 export const exportToPDF = (data, fileName = 'usuarios') => {
   const doc = new jsPDF();
-  
-  // Título
+
   doc.text('Listado de Usuarios', 14, 15);
-  
-  // Tabla
-  doc.autoTable({
-    head: [['Nombre', 'Email', 'Roles']],
-    body: data.map(user => [
-      user.username,
-      user.email,
-      (user.roles || [user.role]).join(', ')
-    ]),
-    startY: 25
+
+  if (!data || data.length === 0) {
+    doc.text('No hay datos para exportar.', 14, 25);
+    doc.save(`${fileName}.pdf`);
+    return;
+  }
+
+  // Extraer columnas dinámicamente desde las claves del primer objeto
+  const columns = Object.keys(data[0]);
+
+  autoTable(doc, {
+    head: [columns],
+    body: data.map(row => columns.map(col => row[col])),
+    startY: 25,
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [41, 128, 185] }
   });
-  
+
   doc.save(`${fileName}.pdf`);
 };

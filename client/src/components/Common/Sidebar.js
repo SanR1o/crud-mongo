@@ -19,7 +19,7 @@ const Sidebar = () => {
       </Nav.Item>
       
       {/* Verificación segura de roles */}
-      {(authService.hasRole('admin') || authService.hasRole('moderator')) && (
+      {(authService.hasRole('admin') || authService.hasRole('coordinador')) && (
         <Nav.Item>
           <Nav.Link as={Link} to="/users" active={location.pathname === '/users'}>
             Usuarios
@@ -33,6 +33,12 @@ const Sidebar = () => {
         </Nav.Link>
       </Nav.Item>
       
+      <Nav.Item>
+        <Nav.Link as={Link} to="/subcategories" active={location.pathname.startsWith('/subcategories')}>
+          Subcategorías
+        </Nav.Link>
+      </Nav.Item>
+
       <Nav.Item>
         <Nav.Link as={Link} to="/products" active={location.pathname.startsWith('/products')}>
           Productos

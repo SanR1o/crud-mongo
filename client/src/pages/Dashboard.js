@@ -30,15 +30,29 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // Aquí irían las llamadas a tu API para obtener estadísticas
-      // Estos son datos de ejemplo - reemplaza con llamadas reales a tu backend
-      const mockStats = {
-        users: 24,
-        products: 156,
-        categories: 12
-      };
-      
-      setStats(mockStats);
+      const headers = authService.getAuthHeader();
+
+      const [usersRes, productsRes, categoriesRes, subcategoriesRes] = await Promise.all([
+        fetch('http://localhost:3000/api/users', { headers }),
+        fetch('http://localhost:3000/api/products', { headers }),
+        fetch('http://localhost:3000/api/categories', { headers }),
+        fetch('http://localhost:3000/api/subcategories', { headers })
+      ]);
+
+      const [users, products, categories, subcategories] = await Promise.all([
+        usersRes.json(),
+        productsRes.json(),
+        categoriesRes.json(),
+        subcategoriesRes.json()
+      ]);
+
+      setStats({
+        users: users.data?.length || 0,
+        products: products.data?.length || 0,
+        categories: categories.data?.length || 0,
+        subcategories: subcategories.data?.length || 0
+      });
+
       setLoading(false);
     } catch (err) {
       console.error('Error al cargar datos:', err);
@@ -47,10 +61,11 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = () => {
+
+  /*const handleLogout = () => {
     authService.logout();
     navigate('/login');
-  };
+  };*/
 
   if (!user) {
     return (
@@ -65,12 +80,7 @@ const Dashboard = () => {
       <Row className="mb-4">
         <Col>
           <h2 className="dashboard-title">Panel de Administración</h2>
-          <p className="text-muted">Bienvenido, {user.email}</p>
-        </Col>
-        <Col md="auto">
-          <Button variant="outline-danger" onClick={handleLogout}>
-            Cerrar Sesión
-          </Button>
+          <p className="text-muted">Bienvenido, {user.username}</p>
         </Col>
       </Row>
 
@@ -93,53 +103,7 @@ const Dashboard = () => {
         </Row>
       ) : (
         <>
-          <Row className="mb-4">
-            <Col md={4}>
-              <Card className="dashboard-card">
-                <Card.Body>
-                  <Card.Title>Usuarios</Card.Title>
-                  <Card.Text className="display-4">{stats.users}</Card.Text>
-                  <Button 
-                    variant="primary" 
-                    onClick={() => navigate('/users')}
-                    disabled={!authService.hasRole('admin')}
-                  >
-                    Gestionar Usuarios
-                  </Button>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={4}>
-              <Card className="dashboard-card">
-                <Card.Body>
-                  <Card.Title>Productos</Card.Title>
-                  <Card.Text className="display-4">{stats.products}</Card.Text>
-                  <Button 
-                    variant="primary" 
-                    onClick={() => navigate('/products')}
-                  >
-                    Gestionar Productos
-                  </Button>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={4}>
-              <Card className="dashboard-card">
-                <Card.Body>
-                  <Card.Title>Categorías</Card.Title>
-                  <Card.Text className="display-4">{stats.categories}</Card.Text>
-                  <Button 
-                    variant="primary" 
-                    onClick={() => navigate('/categories')}
-                  >
-                    Gestionar Categorías
-                  </Button>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-          <Row>
+        <Row className="mb-4">
             <Col>
               <Card className="dashboard-card">
                 <Card.Body>
@@ -158,6 +122,66 @@ const Dashboard = () => {
               </Card>
             </Col>
           </Row>
+
+          <Row className="mb-4">
+            <Col md={3}>
+              <Card className="dashboard-card">
+                <Card.Body>
+                  <Card.Title>Usuarios</Card.Title>
+                  <Card.Text className="display-4">{stats.users}</Card.Text>
+                  <Button 
+                    variant="primary" 
+                    onClick={() => navigate('/users')}
+                    disabled={!(authService.hasRole('admin') || authService.hasRole('coordinador'))}
+                  >
+                    Gestionar Usuarios
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3}>
+              <Card className="dashboard-card">
+                <Card.Body>
+                  <Card.Title>Productos</Card.Title>
+                  <Card.Text className="display-4">{stats.products}</Card.Text>
+                  <Button 
+                    variant="primary" 
+                    onClick={() => navigate('/products')}
+                  >
+                    Gestionar Productos
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3}>
+              <Card className="dashboard-card">
+                <Card.Body>
+                  <Card.Title>Categorías</Card.Title>
+                  <Card.Text className="display-4">{stats.categories}</Card.Text>
+                  <Button 
+                    variant="primary" 
+                    onClick={() => navigate('/categories')}
+                  >
+                    Gestionar Categorías
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3}>
+              <Card className="dashboard-card">
+                <Card.Body>
+                  <Card.Title>Subcategorías</Card.Title>
+                  <Card.Text className="display-4">{stats.subcategories}</Card.Text>
+                  <Button 
+                    variant="primary" 
+                    onClick={() => navigate('/subcategories')}
+                  >
+                    Gestionar Subcategorías
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+            </Row>
         </>
       )}
     </Container>

@@ -14,25 +14,25 @@ const UserForm = () => {
     username: '',
     email: '',
     password: '',
-    roles: []
+    role: '' // ahora es string
   });
   const [errors, setErrors] = useState({
     username: '',
     email: '',
     password: '',
-    roles: ''
+    role: ''
   });
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     const user = authService.getCurrentUser();
     setCurrentUser(user);
-    
+
     const fetchData = async () => {
       try {
         const rolesData = await userService.getRoles();
         setRoles(rolesData);
-        
+
         if (id) {
           setLoading(true);
           const userResponse = await userService.getUserById(id);
@@ -40,7 +40,7 @@ const UserForm = () => {
             username: userResponse.username,
             email: userResponse.email,
             password: '',
-            roles: userResponse.roles || []
+            role: userResponse.role || ''
           });
         }
       } catch (err) {
@@ -60,13 +60,8 @@ const UserForm = () => {
   };
 
   const handleRoleChange = (e) => {
-    const { value, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      roles: checked
-        ? [...prev.roles, value]
-        : prev.roles.filter(role => role !== value)
-    }));
+    setFormData({ ...formData, role: e.target.value });
+    setErrors({ ...errors, role: '' });
   };
 
   const validateForm = () => {
@@ -94,8 +89,8 @@ const UserForm = () => {
       isValid = false;
     }
 
-    if (formData.roles.length === 0) {
-      newErrors.roles = 'Seleccione al menos un rol';
+    if (!formData.role) {
+      newErrors.role = 'Seleccione un rol';
       isValid = false;
     }
 
@@ -112,7 +107,7 @@ const UserForm = () => {
       const userData = {
         username: formData.username,
         email: formData.email,
-        roles: formData.roles
+        role: formData.role
       };
 
       if (formData.password) {
@@ -124,6 +119,7 @@ const UserForm = () => {
       } else {
         await userService.createUser(userData);
       }
+
       navigate('/users');
     } catch (err) {
       setError(err.response?.data?.message || 'Error al guardar usuario');
@@ -143,7 +139,7 @@ const UserForm = () => {
   return (
     <Container className="mt-4">
       <h2>{id ? 'Editar Usuario' : 'Crear Usuario'}</h2>
-      
+
       {error && <Alert variant="danger">{error}</Alert>}
 
       <Form onSubmit={handleSubmit}>
@@ -198,23 +194,24 @@ const UserForm = () => {
         </Form.Group>
 
         <Form.Group className="mb-4">
-          <Form.Label>Roles</Form.Label>
+          <Form.Label>Rol</Form.Label>
           <div className="d-flex flex-wrap gap-3">
             {roles.map((role) => (
               <Form.Check
                 key={role}
-                type="checkbox"
+                type="radio"
                 id={`role-${role}`}
                 label={role}
+                name="role"
                 value={role}
-                checked={formData.roles.includes(role)}
+                checked={formData.role === role}
                 onChange={handleRoleChange}
-                disabled={!currentUser?.roles?.includes('admin') && role === 'admin'}
+                disabled={currentUser?.role !== 'admin' && role === 'admin'}
               />
             ))}
           </div>
-          {errors.roles && (
-            <div className="text-danger small mt-1">{errors.roles}</div>
+          {errors.role && (
+            <div className="text-danger small mt-1">{errors.role}</div>
           )}
         </Form.Group>
 

@@ -12,9 +12,6 @@ const UserDetail = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchUser();
-  }, [id]);
-
   const fetchUser = async () => {
     try {
       const response = await userService.getUserById(id);
@@ -25,6 +22,9 @@ const UserDetail = () => {
       setLoading(false);
     }
   };
+
+  fetchUser();
+}, [id]); 
 
   if (loading) {
     return (

@@ -6,7 +6,7 @@ import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard';
 import PrivateRoute from './components/Common/PrivateRoute';
 import Users from './pages/Users';
-import UserForm from './components/User/UserForm';
+import UserForm from './pages/User/UserForm';
 import UserDetail from './pages/UserDetail';
 
 function App() {

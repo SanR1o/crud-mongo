@@ -31,9 +31,9 @@ const Users = () => {
         });
 
         if (response.data) {
-          setUsers(response.data.users || []);
-          setTotalUsers(response.data.total || 0);
-          setTotalPages(response.data.totalPages || 1);
+          setUsers(response.data.data || []);
+          setTotalUsers(response.data.data.length || 0);
+          setTotalPages(1); // porque no hay paginación real
         } else {
           setUsers([]);
           setTotalUsers(0);
@@ -66,10 +66,10 @@ const Users = () => {
   const handleExport = (exportFunction, fileName) => {
     // Preparar datos para exportación
     const exportData = users.map(user => ({
-      ID: user.id,
-      Nombre: user.name,
+      ID: user._id,
+      Nombre: user.username,
       Email: user.email,
-      Roles: user.roles?.join(', ') || 'Usuario'
+      Roles: user.roles?.join(', ') || user.role
     }));
     
     exportFunction(exportData, fileName);
@@ -97,13 +97,27 @@ const Users = () => {
     pageNumbers.push(i);
   }
 
+  const handleDelete = async (userId) => {
+  const confirm = window.confirm('¿Estás seguro de que deseas eliminar este usuario?');
+  if (!confirm) return;
+
+    try {
+      await axios.delete(`http://localhost:3000/api/users/${userId}`, {
+        headers: authService.getAuthHeader()
+      });
+      setUsers(users.filter(user => user._id !== userId));
+    } catch (err) {
+      alert('Error al eliminar el usuario: ' + (err.response?.data?.message || err.message));
+    }
+  };
+
   return (
     <div className="container mt-4">
       <h2>Lista de Usuarios</h2>
       
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div className="d-flex">
-          {authService.hasRole('admin') && (
+          {(authService.hasRole('admin') || authService.hasRole('coordinador')) && (
             <Link to="/users/create" className="btn btn-primary me-2">
               Crear Nuevo Usuario
             </Link>
@@ -152,19 +166,31 @@ const Users = () => {
         <tbody>
           {users.length > 0 ? (
             users.map(user => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.name}</td>
+              <tr key={user._id}>
+                <td>{user._id}</td>
+                <td>{user.username}</td>
                 <td>{user.email}</td>
-                <td>{user.roles?.join(', ') || 'Usuario'}</td>
+                <td>{user.roles?.join(', ') || user.role}</td>
                 <td>
-                  {authService.hasRole('admin') && (
-                    <Link 
-                      to={`/users/edit/${user.id}`} 
-                      className="btn btn-sm btn-warning"
-                    >
-                      Editar
-                    </Link>
+                  {authService.hasRole('admin') || authService.hasRole('coordinador') ? (
+                    <div className="d-flex gap-2">
+                      <Link
+                        to={`/users/edit/${user._id}`}
+                        className="btn btn-sm btn-warning"
+                      >
+                        Editar
+                      </Link>
+
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDelete(user._id)}
+                      >
+                        Eliminar
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="text-muted">Sin permisos</span>
                   )}
                 </td>
               </tr>

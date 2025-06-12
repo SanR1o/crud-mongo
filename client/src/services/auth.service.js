@@ -9,17 +9,13 @@ class AuthService {
         email,
         password
       });
-      
-      console.log('Respuesta completa:', response.data); // Para diagnóstico
-      
-      // Aquí está el cambio importante - usamos response.data.token
+
       if (response.data.token) {
         const userData = {
-          ...response.data.user,  // Extraemos los datos del usuario
-          accessToken: response.data.token  // Usamos el token de la respuesta
+          ...response.data.user,
+          accessToken: response.data.token
         };
         localStorage.setItem('user', JSON.stringify(userData));
-        console.log('Usuario guardado:', userData); // Verificación
         return userData;
       }
       throw new Error('No se recibió token de acceso');
@@ -45,10 +41,9 @@ class AuthService {
   hasRole(requiredRole) {
     const user = this.getCurrentUser();
     if (!user) return false;
-    
-    // Verifica tanto 'role' como 'roles' para mayor compatibilidad
+
     const userRole = user.role || (user.roles && user.roles[0]);
-    
+
     if (Array.isArray(requiredRole)) {
       return requiredRole.includes(userRole);
     }
@@ -64,4 +59,5 @@ class AuthService {
   }
 }
 
-export default new AuthService();
+const authService = new AuthService();
+export default authService;
