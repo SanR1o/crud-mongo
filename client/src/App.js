@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import PrivateRoute from './components/Common/PrivateRoute';
 import Users from './pages/Users';
 import UserForm from './components/User/UserForm';
+import UserDetail from './pages/UserDetail';
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
             } 
           />
           
-          {/* Gestión de usuarios - requiere admin o moderator */}
+          {/* Gestión de usuarios */}
           <Route 
             path="/users" 
             element={
@@ -54,6 +55,16 @@ function App() {
             element={
               <PrivateRoute requiredRoles={['admin']}>
                 <UserForm />
+              </PrivateRoute>
+            } 
+          />
+          
+          {/* Detalle de usuario - accesible para cualquier usuario autenticado */}
+          <Route 
+            path="/users/detail/:id" 
+            element={
+              <PrivateRoute>
+                <UserDetail />
               </PrivateRoute>
             } 
           />

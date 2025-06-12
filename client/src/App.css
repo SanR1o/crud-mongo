@@ -103,3 +103,27 @@ body {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
 }
+
+/* Estilos para el formulario de usuario */
+.user-form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Estilos para checkboxes de roles */
+.form-check-input {
+  margin-top: 0.3em;
+}
+
+/* Mejoras para tablas */
+.table-actions {
+  white-space: nowrap;
+  width: 1%;
+}
+
+/* Paginación */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}

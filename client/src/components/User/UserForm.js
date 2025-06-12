@@ -16,60 +16,98 @@ const UserForm = () => {
     password: '',
     roles: []
   });
+  const [errors, setErrors] = useState({
+    username: '',
+    email: '',
+    password: '',
+    roles: ''
+  });
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    if (id) {
-      fetchUser();
-    }
-    fetchRoles();
+    const user = authService.getCurrentUser();
+    setCurrentUser(user);
+    
+    const fetchData = async () => {
+      try {
+        const rolesData = await userService.getRoles();
+        setRoles(rolesData);
+        
+        if (id) {
+          setLoading(true);
+          const userResponse = await userService.getUserById(id);
+          setFormData({
+            username: userResponse.username,
+            email: userResponse.email,
+            password: '',
+            roles: userResponse.roles || []
+          });
+        }
+      } catch (err) {
+        setError(err.response?.data?.message || 'Error al cargar datos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [id]);
-
-  const fetchUser = async () => {
-    try {
-      setLoading(true);
-      const response = await userService.getUserById(id);
-      setFormData({
-        username: response.data.username,
-        email: response.data.email,
-        password: '',
-        roles: response.data.roles || [response.data.role]
-      });
-      setLoading(false);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error al cargar usuario');
-      setLoading(false);
-    }
-  };
-
-  const fetchRoles = async () => {
-    try {
-      const response = await userService.getRoles();
-      setRoles(response.data);
-    } catch (err) {
-      console.error('Error al cargar roles:', err);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [name]: value });
+    setErrors({ ...errors, [name]: '' });
   };
 
   const handleRoleChange = (e) => {
     const { value, checked } = e.target;
-    setFormData(prev => {
-      const newRoles = checked
+    setFormData(prev => ({
+      ...prev,
+      roles: checked
         ? [...prev.roles, value]
-        : prev.roles.filter(role => role !== value);
-      return { ...prev, roles: newRoles };
-    });
+        : prev.roles.filter(role => role !== value)
+    }));
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { ...errors };
+
+    if (!formData.username.trim()) {
+      newErrors.username = 'Nombre de usuario es requerido';
+      isValid = false;
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email es requerido';
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email no válido';
+      isValid = false;
+    }
+
+    if (!id && !formData.password) {
+      newErrors.password = 'Contraseña es requerida';
+      isValid = false;
+    } else if (formData.password && formData.password.length < 6) {
+      newErrors.password = 'Mínimo 6 caracteres';
+      isValid = false;
+    }
+
+    if (formData.roles.length === 0) {
+      newErrors.roles = 'Seleccione al menos un rol';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
+    if (!validateForm()) return;
 
+    setLoading(true);
     try {
       const userData = {
         username: formData.username,
@@ -77,7 +115,6 @@ const UserForm = () => {
         roles: formData.roles
       };
 
-      // Solo incluir password si está en modo creación o si se cambió
       if (formData.password) {
         userData.password = formData.password;
       }
@@ -90,6 +127,7 @@ const UserForm = () => {
       navigate('/users');
     } catch (err) {
       setError(err.response?.data?.message || 'Error al guardar usuario');
+    } finally {
       setLoading(false);
     }
   };
@@ -97,16 +135,14 @@ const UserForm = () => {
   if (loading && id) {
     return (
       <Container className="text-center mt-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </Spinner>
+        <Spinner animation="border" />
       </Container>
     );
   }
 
   return (
     <Container className="mt-4">
-      <h2>{id ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h2>
+      <h2>{id ? 'Editar Usuario' : 'Crear Usuario'}</h2>
       
       {error && <Alert variant="danger">{error}</Alert>}
 
@@ -120,8 +156,11 @@ const UserForm = () => {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                required
+                isInvalid={!!errors.username}
               />
+              <Form.Control.Feedback type="invalid">
+                {errors.username}
+              </Form.Control.Feedback>
             </Form.Group>
           </Col>
           <Col md={6}>
@@ -132,32 +171,36 @@ const UserForm = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                required
-                disabled={!!id} // Email no editable en actualización
+                isInvalid={!!errors.email}
+                disabled={!!id}
               />
+              <Form.Control.Feedback type="invalid">
+                {errors.email}
+              </Form.Control.Feedback>
             </Form.Group>
           </Col>
         </Row>
 
         <Form.Group className="mb-3">
-          <Form.Label>Contraseña</Form.Label>
+          <Form.Label>
+            Contraseña {id && <small className="text-muted">(Dejar en blanco para no cambiar)</small>}
+          </Form.Label>
           <Form.Control
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
-            required={!id} // Solo requerido en creación
-            placeholder={id ? "Dejar en blanco para no cambiar" : ""}
+            isInvalid={!!errors.password}
           />
-          {id && <Form.Text className="text-muted">
-            Dejar en blanco para mantener la contraseña actual
-          </Form.Text>}
+          <Form.Control.Feedback type="invalid">
+            {errors.password}
+          </Form.Control.Feedback>
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group className="mb-4">
           <Form.Label>Roles</Form.Label>
-          <div>
-            {roles.map(role => (
+          <div className="d-flex flex-wrap gap-3">
+            {roles.map((role) => (
               <Form.Check
                 key={role}
                 type="checkbox"
@@ -166,30 +209,28 @@ const UserForm = () => {
                 value={role}
                 checked={formData.roles.includes(role)}
                 onChange={handleRoleChange}
-                disabled={!authService.hasRole('admin')} // Solo admin puede cambiar roles
+                disabled={!currentUser?.roles?.includes('admin') && role === 'admin'}
               />
             ))}
           </div>
+          {errors.roles && (
+            <div className="text-danger small mt-1">{errors.roles}</div>
+          )}
         </Form.Group>
 
-        <div className="d-flex justify-content-end">
-          <Button variant="secondary" className="me-2" onClick={() => navigate('/users')}>
+        <div className="d-flex justify-content-end gap-2">
+          <Button variant="secondary" onClick={() => navigate('/users')}>
             Cancelar
           </Button>
           <Button variant="primary" type="submit" disabled={loading}>
             {loading ? (
               <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                  className="me-2"
-                />
+                <Spinner size="sm" className="me-2" />
                 Guardando...
               </>
-            ) : 'Guardar'}
+            ) : (
+              'Guardar'
+            )}
           </Button>
         </div>
       </Form>

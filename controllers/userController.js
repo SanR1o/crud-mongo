@@ -124,6 +124,11 @@ exports.updateUser = async (req, res) => {
             });
         }
 
+        // Si se envía una nueva contraseña, hashearla antes de actualizar
+        if (req.body.password) {
+            req.body.password = await bcrypt.hash(req.body.password, 10);
+        }
+
         // Si no es auxiliar o es un admin/coordinador, se puede proceder con la actualización
         const updatedUser = await User.findByIdAndUpdate(
             req.params.id,  // Usamos el ID de la URL
