@@ -7,46 +7,65 @@ const Sidebar = () => {
   const location = useLocation();
   const user = authService.getCurrentUser();
 
-  console.log('Usuario actual:', user); // Verifica en consola del navegador
-  console.log('Roles del usuario:', user?.roles); // Verifica los roles
-
   return (
-    <Nav className="flex-column bg-light p-3" style={{ width: '250px' }}>
+    <Nav className="flex-column bg-light p-3" style={{ width: '250px', height: '100vh' }}>
       <Nav.Item>
         <Nav.Link as={Link} to="/dashboard" active={location.pathname === '/dashboard'}>
           Dashboard
         </Nav.Link>
       </Nav.Item>
-      
-      {/* Verificación segura de roles */}
+
+      {/* Usuarios: solo visible para admin y coordinador */}
       {(authService.hasRole('admin') || authService.hasRole('coordinador')) && (
         <Nav.Item>
-          <Nav.Link as={Link} to="/users" active={location.pathname === '/users'}>
+          <Nav.Link 
+            as={Link} 
+            to="/users" 
+            active={location.pathname.startsWith('/users')}
+          >
             Usuarios
           </Nav.Link>
         </Nav.Item>
       )}
-      
-      <Nav.Item>
-        <Nav.Link as={Link} to="/categories" active={location.pathname.startsWith('/categories')}>
-          Categorías
-        </Nav.Link>
-      </Nav.Item>
-      
-      <Nav.Item>
-        <Nav.Link as={Link} to="/subcategories" active={location.pathname.startsWith('/subcategories')}>
-          Subcategorías
-        </Nav.Link>
-      </Nav.Item>
 
+      {/* Categorías: visible para admin y coordinador */}
+      {(authService.hasRole('admin') || authService.hasRole('coordinador')) && (
+        <Nav.Item>
+          <Nav.Link 
+            as={Link} 
+            to="/categories" 
+            active={location.pathname.startsWith('/categories')}
+          >
+            Categorías
+          </Nav.Link>
+        </Nav.Item>
+      )}
+
+      {/* Subcategorías: visible para admin y coordinador */}
+      {(authService.hasRole('admin') || authService.hasRole('coordinador')) && (
+        <Nav.Item>
+          <Nav.Link 
+            as={Link} 
+            to="/categories/1/subcategories" 
+            active={location.pathname.includes('/subcategories')}
+          >
+            Subcategorías
+          </Nav.Link>
+        </Nav.Item>
+      )}
+
+      {/* Productos: visible para cualquier usuario autenticado */}
       <Nav.Item>
-        <Nav.Link as={Link} to="/products" active={location.pathname.startsWith('/products')}>
+        <Nav.Link 
+          as={Link} 
+          to="/products" 
+          active={location.pathname.startsWith('/products')}
+        >
           Productos
         </Nav.Link>
       </Nav.Item>
     </Nav>
   );
-  
 };
 
 export default Sidebar;

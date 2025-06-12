@@ -90,6 +90,17 @@ exports.getSubcategoryById = async (req, res) => {
     }
 };
 
+exports.getSubcategoriesByCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+    const subcategories = await Subcategory.find({ category: categoryId });
+    res.status(200).json(subcategories);
+  } catch (error) {
+    console.error('Error al obtener subcategorías por categoría:', error);
+    res.status(500).json({ message: 'Error al obtener las subcategorías' });
+  }
+};
+
 //actualizar
 exports.updateSubcategory = async (req, res) => {
     try{

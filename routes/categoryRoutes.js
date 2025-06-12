@@ -11,6 +11,9 @@ router.post('/',
     categoryController.createCategory
 );
 
+// Obtener subcategorías de una categoría específica
+router.get('/:id/subcategories', categoryController.getSubcategoriesByCategoryId);
+
 //obtener todas las categorias
 router.get('/', categoryController.getCategories);
 

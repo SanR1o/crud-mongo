@@ -1,4 +1,5 @@
 const Category = require('../models/Category');
+const Subcategory = require('../models/Subcategory'); // asegúrate de importar el modelo
 
 exports.createCategory = async (req, res) => {
     try {
@@ -104,6 +105,18 @@ exports.getCategoryById = async (req, res) => {
         });
     }
 };
+
+    exports.getSubcategoriesByCategoryId = async (req, res) => {
+        try {
+            const subcategories = await Subcategory.find({ category: req.params.id });
+            res.status(200).json({ data: subcategories });
+        } catch (error) {
+            res.status(500).json({ 
+                message: 'Error al obtener subcategorías por categoría', 
+                error 
+            });
+        }
+    };
 
 exports.updateCategory = async (req, res) => {
     try {

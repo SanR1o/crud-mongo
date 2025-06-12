@@ -20,6 +20,8 @@ router.post('/',
     subcategoryController.createSubcategory
 );
 
+router.get('/category/:categoryId', subcategoryController.getSubcategoriesByCategory);
+
 //Obtener todas las subcategorias
 router.get('/', subcategoryController.getSubcategories);
 

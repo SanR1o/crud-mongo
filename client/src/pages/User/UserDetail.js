@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Alert, Spinner, Row, Col, Badge } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
-import userService from '../services/user.service';
-import authService from '../services/auth.service';
+import userService from '../../services/user.service';
+import authService from '../../services/auth.service';
 
 const UserDetail = () => {
   const { id } = useParams();
