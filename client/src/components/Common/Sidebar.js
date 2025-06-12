@@ -5,7 +5,7 @@ import authService from '../../services/auth.service';
 
 const Sidebar = () => {
   const location = useLocation();
-  const user = authService.getCurrentUser();
+  //const user = authService.getCurrentUser();
 
   return (
     <Nav className="flex-column bg-light p-3" style={{ width: '250px', height: '100vh' }}>
@@ -46,8 +46,8 @@ const Sidebar = () => {
         <Nav.Item>
           <Nav.Link 
             as={Link} 
-            to="/categories/1/subcategories" 
-            active={location.pathname.includes('/subcategories')}
+            to="/subcategories" 
+            active={location.pathname === '/subcategories'}
           >
             Subcategorías
           </Nav.Link>

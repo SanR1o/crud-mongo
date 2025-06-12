@@ -1,5 +1,4 @@
-// client/src/pages/Subcategories.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Modal, Alert, Badge, Breadcrumb } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import subcategoryService from '../services/subcategory.service';
@@ -9,10 +8,46 @@ const Subcategories = ({ showAll = false }) => {
   const { categoryId } = useParams();
   const [subcategories, setSubcategories] = useState([]);
   const [category, setCategory] = useState(null);
+  const [isLoadingCategory, setIsLoadingCategory] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [subcategoryIdToDelete, setSubcategoryIdToDelete] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const fetchCategory = useCallback(async () => {
+    setIsLoadingCategory(true);
+    try {
+      const response = await categoryService.get(categoryId);
+      console.log('ID de categoría desde useParams:', categoryId);
+      console.log('Respuesta del backend de categoryService.get:', response.data);
+      setCategory(response.data.data);
+    } catch (err) {
+      setError('Error al cargar la categoría');
+      console.error(err);
+    } finally {
+      setIsLoadingCategory(false);
+    }
+  }, [categoryId]);
+
+  const fetchSubcategoriesByCategory = useCallback(async () => {
+    try {
+      const response = await subcategoryService.getByCategory(categoryId);
+      setSubcategories(response.data);
+    } catch (err) {
+      setError('Error al cargar las subcategorías');
+      console.error(err);
+    }
+  }, [categoryId]);
+
+  const fetchAllSubcategories = async () => {
+    try {
+      const response = await subcategoryService.getAll();
+      setSubcategories(response.data.data || response.data);
+    } catch (err) {
+      setError('Error al cargar todas las subcategorías');
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     if (showAll) {
@@ -21,37 +56,7 @@ const Subcategories = ({ showAll = false }) => {
       fetchCategory();
       fetchSubcategoriesByCategory();
     }
-  }, [categoryId, showAll]);
-
-  const fetchCategory = async () => {
-    try {
-      const response = await categoryService.get(categoryId);
-      setCategory(response.data);
-    } catch (err) {
-      setError('Error al cargar la categoría');
-      console.error(err);
-    }
-  };
-
-  const fetchSubcategoriesByCategory = async () => {
-    try {
-      const response = await subcategoryService.getByCategory(categoryId);
-      setSubcategories(response.data);
-    } catch (err) {
-      setError('Error al cargar las subcategorías');
-      console.error(err);
-    }
-  };
-
-  const fetchAllSubcategories = async () => {
-    try {
-      const response = await subcategoryService.getAll();
-      setSubcategories(response.data.data || response.data); // depende de tu backend
-    } catch (err) {
-      setError('Error al cargar todas las subcategorías');
-      console.error(err);
-    }
-  };
+  }, [categoryId, showAll, fetchCategory, fetchSubcategoriesByCategory]);
 
   const handleDelete = (id) => {
     setSubcategoryIdToDelete(id);
@@ -86,9 +91,9 @@ const Subcategories = ({ showAll = false }) => {
         <h2>
           {showAll
             ? 'Todas las Subcategorías'
-            : category
-            ? `Subcategorías de ${category?.name}`
-            : 'Cargando categoría...'}
+            : isLoadingCategory || !category
+            ? 'Cargando categoría...'
+            : `Subcategorías de ${category.name}`}
         </h2>
         <Button
           as={Link}
@@ -109,9 +114,9 @@ const Subcategories = ({ showAll = false }) => {
       <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th>Nombre</th>
+            {showAll && <th>Categoría</th>}
+            <th>Subcategoria</th>
             <th>Descripción</th>
-            {showAll && <th>Categoría (ID)</th>}
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -119,9 +124,15 @@ const Subcategories = ({ showAll = false }) => {
         <tbody>
           {subcategories.map((subcategory) => (
             <tr key={subcategory._id}>
+              {showAll && (
+                <td>
+                  {subcategory.category
+                    ? `${subcategory.category.name}`
+                    : '-'}
+                </td>
+              )}
               <td>{subcategory.name}</td>
               <td>{subcategory.description}</td>
-              {showAll && <td>{subcategory.category || '-'}</td>}
               <td>
                 <Badge bg={subcategory.status ? 'success' : 'secondary'}>
                   {subcategory.status ? 'Activo' : 'Inactivo'}
